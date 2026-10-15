@@ -24,6 +24,26 @@ has a sandbox implementation and the LLM defaults to local Ollama.
 
 ---
 
+## Problem
+
+Operational work arrives as email, support tickets, chat messages, and PDFs, and a person copies the details between systems by hand. It is slow, inconsistent, and hard to audit.
+
+## Approach
+
+An explicit LangGraph state machine classifies each request, extracts the fields, grounds itself in company knowledge, then acts: a Jira ticket, a drafted customer reply, a Slack notification, a Postgres record, and a manager report. FastAPI with JWT auth in front, a Redis queue and an idempotent worker behind it. Every integration has a sandbox implementation, so the whole pipeline runs with no external accounts and no secrets.
+
+## Results
+
+- 159 tests, 86 percent coverage, mypy strict, green CI
+- A labeled 24 case golden set runs through the production classify and extract nodes, and a guardrail corpus catches 5 of 5 known bad drafts
+- Orchestration overhead measured at 20 to 35 ms p50 per 8 node run. End to end latency is dominated by the model call, and this README says so
+- Container image: https://github.com/users/Sairajiv-13/packages/container/package/enterprise-ai-ops-agent
+- Stated plainly: the sandbox model scoring near 100 percent on the golden set proves the graph wiring, not model judgment. Real model scoring is a separate, documented exercise
+
+## Tech stack
+
+Python 3.12, LangGraph, FastAPI, PostgreSQL, Redis, JWT auth, Ollama or a hosted model, Docker, GitHub Actions
+
 ## Project status. What's real, what isn't
 
 An honest frame, because it's the thing most portfolio READMEs get wrong
