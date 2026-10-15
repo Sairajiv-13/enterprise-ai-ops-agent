@@ -79,7 +79,7 @@ Each of these is a real mechanism with a test and an ADR, not a checkbox:
 - **Idempotency, proven.** A test replays one request 10× and asserts exactly one
   ticket / email / Slack post; a CI check fails the build if any external key stops
   being a pure function of `request_id`. [ADR-0017](docs/adr/0017-idempotency-strategy.md)
-- **Output guardrails.** The one LLM output that reaches a customer — the emailed
+- **Output guardrails.** The one LLM output that reaches a customer: the emailed
   reply. Passes a deterministic gate (length, foreign-address leak, prompt-echo)
   before it sends; a held reply waits for a human. [ADR-0018](docs/adr/0018-output-guardrails.md)
 - **Observability.** Golden-signal + cost/guardrail metrics, a bundled Grafana
@@ -169,8 +169,8 @@ make worker          # terminal 2
 
 ## Turning on real integrations
 
-Everything is one env flag at a time (see `.env.example`). Nothing else changes —
-the adapters and their contract tests are identical.
+Everything is one env flag at a time (see `.env.example`). Nothing else changes.
+The adapters and their contract tests are identical.
 
 | Integration | Flag | What it needs |
 |-------------|------|---------------|
@@ -262,12 +262,12 @@ drafts. See [ADR-0009](docs/adr/0009-evaluation-and-quality-gates.md).
 
 `make bench` runs an in-process harness (sandbox model, SQLite, fakeredis) that
 isolates the overhead *our code* adds. Honest headline: orchestration overhead is
-**~20–35 ms p50 (warm)** per 8-node pipeline with **~6 KiB** transient memory per
-run; end-to-end latency in production is **dominated by the LLM call** (0.5–3 s).
+**~20 to 35 ms p50 (warm)** per 8-node pipeline with **~6 KiB** transient memory per
+run; end-to-end latency in production is **dominated by the LLM call** (0.5 to 3 s).
 
 The design makes capacity easy to reason about: ingest is non-blocking (validate +
 insert + enqueue), processing is LLM-bound at `~1/L` jobs/s per worker, and the
-reliable queue decouples them so throughput is **`N/L`** — tuned by worker count.
+reliable queue decouples them so throughput is **`N/L`**, tuned by worker count.
 Representative load numbers require a deployed environment (Postgres + Redis + a
 real model); the harness, methodology, capacity model, and the exact steps to get
 real numbers are in [`docs/BENCHMARKS.md`](docs/BENCHMARKS.md). `/metrics` already
